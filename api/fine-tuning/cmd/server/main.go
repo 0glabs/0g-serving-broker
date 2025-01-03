@@ -51,7 +51,10 @@ func Main() {
 	}
 
 	engine := gin.New()
-	h := handler.New(ctrl)
+	h := handler.New(ctrl, config)
+	if h == nil {
+		panic("Error creating handler")
+	}
 	h.Register(engine)
 
 	stop := make(chan os.Signal, 1)

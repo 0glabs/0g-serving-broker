@@ -13,27 +13,26 @@ type Task struct {
 	CreatedAt           *time.Time            `json:"createdAt" readonly:"true" gen:"-"`
 	UpdatedAt           *time.Time            `json:"updatedAt" readonly:"true" gen:"-"`
 	CustomerAddress     string                `gorm:"type:varchar(255);not null" json:"customerAddress" binding:"required"`
+	TokenizerHash       string                `gorm:"type:varchar(255);not null" json:"tokenizerHash" binding:"required"`
 	PreTrainedModelHash string                `gorm:"type:varchar(255);not null" json:"preTrainedModelHash" binding:"required"`
-	FineTunedScriptHash string                `gorm:"type:varchar(255);not null" json:"fineTunedScriptHash" binding:"required"`
 	DatasetHash         string                `gorm:"type:varchar(255);not null" json:"datasetHash" binding:"required"`
-	Command             string                `gorm:"type:varchar(255);not null" json:"command" binding:"required"`
-	EpochNumber         uint                  `gorm:"type:uint;not null;default 0" json:"epochNumber" binding:"required"`
+	TrainingParams      string                `gorm:"type:json;not null" json:"trainingParams" binding:"required"`
+	IsTurbo             bool                  `gorm:"type:bool;not null;default:false" json:"isTurbo" binding:"required"`
 	Progress            *uint                 `gorm:"type:uint;not null;default 0" json:"progress" readonly:"true"`
 	DeletedAt           soft_delete.DeletedAt `gorm:"softDelete:nano;not null;default:0;index:deleted_name" json:"-" readonly:"true"`
 }
 
 func (d *Task) Bind(ctx *gin.Context) error {
 	var r Task
-	if err := ctx.ShouldBindJSON(&r); err != nil {
+	if err := ctx.ShouldBindTOML(&r); err != nil {
 		return err
 	}
 	d.CustomerAddress = r.CustomerAddress
 	d.PreTrainedModelHash = r.PreTrainedModelHash
-	d.FineTunedScriptHash = r.FineTunedScriptHash
 	d.DatasetHash = r.DatasetHash
-	d.Command = r.Command
-	d.EpochNumber = r.EpochNumber
-
+	d.TokenizerHash = r.TokenizerHash
+	d.TrainingParams = r.TrainingParams
+	d.IsTurbo = r.IsTurbo
 	return nil
 }
 
