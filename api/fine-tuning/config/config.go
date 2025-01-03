@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/0glabs/0g-serving-broker/common/config"
+	providers "github.com/openweb3/go-rpc-provider/provider_wrapper"
 )
 
 type Service struct {
@@ -22,6 +23,7 @@ type Service struct {
 	} `yaml:"quota"`
 	PricePerToken int64 `yaml:"pricePerToken"`
 }
+	
 
 type Config struct {
 	ContractAddress string `yaml:"contractAddress"`
@@ -29,8 +31,11 @@ type Config struct {
 		FineTune string `yaml:"fineTune"`
 	} `yaml:"database"`
 	Networks   config.Networks `mapstructure:"networks" yaml:"networks"`
+	IndexerStandardUrl string          `yaml:"indexerStandardUrl"`
+	IndexerTurboUrl    string          `yaml:"indexerTurboUrl"`
 	ServingUrl string          `yaml:"servingUrl"`
 	Services   []Service       `mapstructure:"services" yaml:"services"`
+	ProviderOption providers.Option `mapstructure:"providerOption" yaml:"providerOption"`
 }
 
 var (
