@@ -25,9 +25,11 @@ func (h *Handler) Register(r *gin.Engine) {
 
 	group.POST("/task", h.CreateTask)
 	group.GET("/task/:taskID", h.GetTask)
+	group.GET("/latest-task/:addr", h.GetLatestTask)
 
 	group.GET("/quote", h.GetQuote)
 	group.GET("/task-progress/:taskID", h.GetTaskProgress)
+	group.GET("/latest-task-progress/:addr", h.GetLatestTaskProgress)
 }
 
 func handleBrokerError(ctx *gin.Context, err error, context string) {

@@ -55,6 +55,23 @@ func (h *Handler) GetTask(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, task)
 }
 
+// getLatestTask
+//
+//	@Description  This endpoint allows you to get latest task
+//	@ID			getLatestTask
+//	@Tags		task
+//	@Router		/latest-task [get]
+//	@Success	200	{object}	schema.Task
+func (h *Handler) GetLatestTask(ctx *gin.Context) {
+	task, err := h.ctrl.GetLatestTask(ctx.Param("addr"))
+	if err != nil {
+		handleBrokerError(ctx, err, "get latest task")
+		return
+	}
+
+	ctx.JSON(http.StatusOK, task)
+}
+
 // getQuote
 //
 //	@Description  This endpoint allows you to get quote
@@ -79,6 +96,23 @@ func (h *Handler) GetTaskProgress(ctx *gin.Context) {
 		return
 	}
 	filePath, err := h.ctrl.GetProgress(&id)
+	if err != nil {
+		handleBrokerError(ctx, err, "get task")
+		return
+	}
+
+	ctx.FileAttachment(filePath, "progress.log")
+
+	ctx.Status(http.StatusOK)
+}
+
+func (h *Handler) GetLatestTaskProgress(ctx *gin.Context) {
+	task, err := h.ctrl.GetLatestTask(ctx.Param("addr"))
+	if err != nil {
+		handleBrokerError(ctx, err, "get latest task")
+		return
+	}
+	filePath, err := h.ctrl.GetProgress(task.ID)
 	if err != nil {
 		handleBrokerError(ctx, err, "get task")
 		return
