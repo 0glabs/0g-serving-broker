@@ -32,15 +32,19 @@ func NewSettlementProcessor(ctrl *ctrl.Ctrl, checkSettleInterval, forceSettleInt
 
 // Start implements controller-runtime/pkg/manager.Runnable interface
 func (s SettlementProcessor) Start(ctx context.Context) error {
+	s.ctrl.Logger().Infof("Starting settlement processor with intervals: settlement=%d, force=%d", s.checkSettleInterval, s.forceSettleInterval)
+
 	checkSettleTicker := time.NewTicker(time.Duration(s.checkSettleInterval) * time.Second)
-	forceSettleTicker := time.NewTicker(time.Duration(s.forceSettleInterval) * time.Second)
 	defer checkSettleTicker.Stop()
+
+	forceSettleTicker := time.NewTicker(time.Duration(s.forceSettleInterval) * time.Second)
 	defer forceSettleTicker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return ctx.Err()
+			s.ctrl.Logger().Info("Settlement processor stopped")
+			return nil
 		case <-checkSettleTicker.C:
 			s.handleCheckSettle(ctx)
 		case <-forceSettleTicker.C:
@@ -72,6 +76,8 @@ func (s *SettlementProcessor) incrementMonitorCounter(counter prometheus.Counter
 		counter.Inc()
 	}
 	if err != nil {
-		log.Printf(logMsg, err.Error())
+		s.ctrl.Logger().Errorf(logMsg, err.Error())
+	} else {
+		s.ctrl.Logger().Info(logMsg)
 	}
 }

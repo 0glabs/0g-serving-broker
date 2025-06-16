@@ -26,7 +26,7 @@ monitor:
   enable: true
   eventAddress: "0g-serving-provider-event:3081"
 service:
-  servingUrl: http://192.168.1.105:3080
+  servingUrl: http://127.0.0.1:3080
   targetUrl: https://api.openai.com/v1
   inputPrice: 1
   outputPrice: 1

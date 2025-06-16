@@ -6,12 +6,15 @@ import (
 
 	"github.com/patrickmn/go-cache"
 
+	"github.com/0glabs/0g-serving-broker/common/log"
 	"github.com/0glabs/0g-serving-broker/common/tee"
 	"github.com/0glabs/0g-serving-broker/inference/config"
 	providercontract "github.com/0glabs/0g-serving-broker/inference/internal/contract"
 	"github.com/0glabs/0g-serving-broker/inference/internal/db"
 	"github.com/0glabs/0g-serving-broker/inference/internal/signer"
 	"github.com/0glabs/0g-serving-broker/inference/zkclient"
+	"github.com/sirupsen/logrus"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
 
 type Ctrl struct {
@@ -27,6 +30,9 @@ type Ctrl struct {
 
 	teeService *tee.TeeService
 	signer     *signer.Signer
+	logger     log.Logger
+
+	customizedModels map[ethcommon.Hash]config.CustomizedModel
 }
 
 func New(
@@ -48,7 +54,16 @@ func New(
 		svcCache:             svcCache,
 		teeService:           teeService,
 		signer:               signer,
+		customizedModels:     make(map[ethcommon.Hash]config.CustomizedModel),
 	}
 
 	return p
+}
+
+func (c *Ctrl) SetLogger(logger log.Logger) {
+	c.logger = logger.WithFields(logrus.Fields{"name": "inference"})
+}
+
+func (c *Ctrl) Logger() log.Logger {
+	return c.logger
 }

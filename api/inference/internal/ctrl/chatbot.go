@@ -53,20 +53,26 @@ type Message struct {
 func (c *Ctrl) GetChatbotInputFee(reqBody []byte) (string, error) {
 	inputCount, err := getInputCount(reqBody)
 	if err != nil {
+		c.logger.Errorf("Failed to get input count: %v", err)
 		return "", errors.Wrap(err, "get input count")
 	}
 
 	expectedInputFee, err := util.Multiply(inputCount, c.Service.InputPrice)
 	if err != nil {
+		c.logger.Errorf("Failed to calculate input fee: %v", err)
 		return "", errors.Wrap(err, "calculate input fee")
 	}
+	c.logger.Infof("Calculated input fee: %s for %d tokens", expectedInputFee.String(), inputCount)
 	return expectedInputFee.String(), nil
 }
 
 func getReqContent(reqBody []byte) (RequestBody, error) {
 	var ret RequestBody
 	err := json.Unmarshal(reqBody, &ret)
-	return ret, errors.Wrap(err, "unmarshal response")
+	if err != nil {
+		return ret, errors.Wrap(err, "unmarshal response")
+	}
+	return ret, nil
 }
 
 func getInputCount(reqBody []byte) (int64, error) {

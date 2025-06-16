@@ -17,14 +17,21 @@ import (
 )
 
 func (c *Ctrl) CreateRequest(req model.Request) error {
-	return errors.Wrap(c.db.CreateRequest(req), "create request in db")
+	if err := c.db.CreateRequest(req); err != nil {
+		c.logger.Errorf("Failed to create request in db: %v", err)
+		return errors.Wrap(err, "create request in db")
+	}
+	c.logger.Infof("Created request for user %s", req.User)
+	return nil
 }
 
 func (c *Ctrl) ListRequest(q model.RequestListOptions) ([]model.Request, int, error) {
 	list, fee, err := c.db.ListRequest(q)
 	if err != nil {
+		c.logger.Errorf("Failed to list requests from db: %v", err)
 		return nil, 0, errors.Wrap(err, "list service from db")
 	}
+	c.logger.Infof("Listed %d requests for user %s", len(list), q.User)
 	return list, fee, nil
 }
 
@@ -35,15 +42,19 @@ func (c *Ctrl) GetFromHTTPRequest(ctx *gin.Context) (model.Request, error) {
 	for k := range constant.RequestMetaData {
 		values := headerMap.Values(k)
 		if len(values) == 0 {
-			return req, errors.Wrapf(errors.New("missing Header"), "%s", k)
+			err := errors.Wrapf(errors.New("missing Header"), "%s", k)
+			c.logger.Errorf("Failed to get request metadata: %v", err)
+			return req, err
 		}
 		value := values[0]
 
 		if err := updateRequestField(&req, k, value); err != nil {
+			c.logger.Errorf("Failed to update request field %s: %v", k, err)
 			return req, err
 		}
 	}
 
+	c.logger.Infof("Parsed request metadata for user %s", req.User)
 	return req, nil
 }
 
