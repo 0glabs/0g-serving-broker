@@ -95,8 +95,7 @@ func Main() {
 	}
 	contract.EncryptedPrivKey = encryptedKey
 
-	ctrl := ctrl.New(db, contract, zk, config.Service, config.Interval.AutoSettleBufferTime, svcCache, teeService, signer)
-	ctrl.SetLogger(logger)
+	ctrl := ctrl.New(db, contract, zk, config.Service, config.Interval.AutoSettleBufferTime, svcCache, teeService, signer, logger)
 
 	if err := ctrl.SyncUserAccounts(ctx); err != nil {
 		logger.Errorf("Failed to sync user accounts: %v", err)

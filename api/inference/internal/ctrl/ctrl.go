@@ -31,8 +31,6 @@ type Ctrl struct {
 	teeService *tee.TeeService
 	signer     *signer.Signer
 	logger     log.Logger
-
-	customizedModels map[ethcommon.Hash]config.CustomizedModel
 }
 
 func New(
@@ -44,6 +42,7 @@ func New(
 	svcCache *cache.Cache,
 	teeService *tee.TeeService,
 	signer *signer.Signer,
+	logger log.Logger,
 ) *Ctrl {
 	p := &Ctrl{
 		autoSettleBufferTime: time.Duration(autoSettleBufferTime) * time.Second,
@@ -54,16 +53,7 @@ func New(
 		svcCache:             svcCache,
 		teeService:           teeService,
 		signer:               signer,
-		customizedModels:     make(map[ethcommon.Hash]config.CustomizedModel),
+		logger:               logger.WithFields(logrus.Fields{"name": "inference"}),
 	}
-
 	return p
-}
-
-func (c *Ctrl) SetLogger(logger log.Logger) {
-	c.logger = logger.WithFields(logrus.Fields{"name": "inference"})
-}
-
-func (c *Ctrl) Logger() log.Logger {
-	return c.logger
 }

@@ -20,7 +20,6 @@ import (
 	"github.com/0glabs/0g-serving-broker/inference/internal/signer"
 	"github.com/0glabs/0g-serving-broker/inference/monitor"
 	"github.com/0glabs/0g-serving-broker/inference/zkclient"
-	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
 )
 
@@ -49,9 +48,7 @@ func Main() {
 		panic(err)
 	}
 	if conf.Interval.AutoSettleBufferTime > int(contract.LockTime) {
-		err := errors.New("Interval.AutoSettleBufferTime grater than refund LockTime")
-		logger.Errorf("%v", err)
-		panic(err)
+		panic(errors.New("Interval.AutoSettleBufferTime greater than refund LockTime"))
 	}
 	if conf.Interval.AutoSettleBufferTime > conf.Interval.ForceSettlementProcessor {
 		err := errors.New("Interval.AutoSettleBufferTime grater than forceSettlement Interval")
@@ -110,10 +107,9 @@ func Main() {
 	}
 	contract.EncryptedPrivKey = encryptedKey
 
-	ctrl := ctrl.New(db, contract, zk, conf.Service, conf.Interval.AutoSettleBufferTime, nil, teeService, signer)
-	ctrl.SetLogger(logger)
+	ctrl := ctrl.New(db, contract, zk, conf.Service, conf.Interval.AutoSettleBufferTime, nil, teeService, signer, logger)
 
-	settlementProcessor := event.NewSettlementProcessor(ctrl, conf.Interval.SettlementProcessor, conf.Interval.ForceSettlementProcessor, conf.Monitor.Enable)
+	settlementProcessor := event.NewSettlementProcessor(ctrl, logger, conf.Interval.SettlementProcessor, conf.Interval.ForceSettlementProcessor, conf.Monitor.Enable)
 	if err := mgr.Add(settlementProcessor); err != nil {
 		logger.Errorf("Failed to add settlement processor: %v", err)
 		panic(err)
