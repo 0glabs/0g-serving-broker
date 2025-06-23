@@ -155,7 +155,7 @@ func (c *Ctrl) SettleFees(ctx context.Context) error {
 	}
 	settlementInfoJSON, err := json.Marshal(settlementInfos)
 	if err != nil {
-		log.Println("Error marshalling settlement infos:", err)
+		c.logger.Errorf("Error marshalling settlement infos: %v", err)
 		settlementInfoJSON = []byte("[]")
 	}
 	logger.Printf("Settlement infos: %s", string(settlementInfoJSON))
@@ -204,7 +204,7 @@ func (c *Ctrl) ProcessSettlement(ctx context.Context) error {
 	if len(accounts) == 0 {
 		return nil
 	}
-	log.Print("Accounts at risk of having insufficient funds and will be settled immediately.")
+	c.logger.Warn("Accounts at risk of having insufficient funds and will be settled immediately.")
 	return errors.Wrap(c.SettleFees(ctx), "settle fees")
 }
 
