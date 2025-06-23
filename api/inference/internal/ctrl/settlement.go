@@ -158,7 +158,7 @@ func (c *Ctrl) SettleFees(ctx context.Context) error {
 		log.Println("Error marshalling settlement infos:", err)
 		settlementInfoJSON = []byte("[]")
 	}
-	log.Printf("Settlement infos: %s", string(settlementInfoJSON))
+	logger.Printf("Settlement infos: %s", string(settlementInfoJSON))
 	if err := c.contract.SettleFees(ctx, verifierInput); err != nil {
 		return errors.Wrapf(err, "settle fees in contract, the ")
 	}
