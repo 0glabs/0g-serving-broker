@@ -53,7 +53,7 @@ func New(
 		svcCache:             svcCache,
 		teeService:           teeService,
 		signer:               signer,
-		logger:               logger.WithFields(logrus.Fields{"name": "inference"}),
+		logger:               logger,
 	}
 	return p
 }

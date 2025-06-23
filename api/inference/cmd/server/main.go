@@ -20,6 +20,7 @@ import (
 	"github.com/0glabs/0g-serving-broker/inference/internal/proxy"
 	"github.com/0glabs/0g-serving-broker/inference/internal/signer"
 	"github.com/0glabs/0g-serving-broker/inference/zkclient"
+	"github.com/sirupsen/logrus"
 )
 
 //go:generate swag fmt
@@ -95,6 +96,7 @@ func Main() {
 	}
 	contract.EncryptedPrivKey = encryptedKey
 
+	logger = logger.WithFields(logrus.Fields{"name": "inference"})
 	ctrl := ctrl.New(db, contract, zk, config.Service, config.Interval.AutoSettleBufferTime, svcCache, teeService, signer, logger)
 
 	if err := ctrl.SyncUserAccounts(ctx); err != nil {

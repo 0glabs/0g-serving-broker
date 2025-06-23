@@ -51,7 +51,7 @@ func Main() {
 		panic(errors.New("Interval.AutoSettleBufferTime greater than refund LockTime"))
 	}
 	if conf.Interval.AutoSettleBufferTime > conf.Interval.ForceSettlementProcessor {
-		err := errors.New("Interval.AutoSettleBufferTime grater than forceSettlement Interval")
+		err := errors.New("Interval.AutoSettleBufferTime greater than forceSettlement Interval")
 		logger.Errorf("%v", err)
 		panic(err)
 	}
