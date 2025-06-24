@@ -24,6 +24,7 @@ type Proxy struct {
 	serviceTarget     string
 	serviceType       string
 	serviceGroup      *gin.RouterGroup
+	logger            *log.Logger
 }
 
 func New(ctrl *ctrl.Ctrl, engine *gin.Engine, allowOrigins []string, enableMonitor bool) *Proxy {
@@ -31,6 +32,7 @@ func New(ctrl *ctrl.Ctrl, engine *gin.Engine, allowOrigins []string, enableMonit
 		allowOrigins: allowOrigins,
 		ctrl:         ctrl,
 		serviceGroup: engine.Group(constant.ServicePrefix),
+		logger:       log.Default(),
 	}
 
 	p.serviceGroup.Use(cors.New(cors.Config{
@@ -101,7 +103,7 @@ func (p *Proxy) proxyHTTPRequest(ctx *gin.Context) {
 		p.ctrl.ProcessHTTPRequest(ctx, svcType, httpReq, model.Request{}, "0", 0, false)
 		return
 	}
-	log.Printf("received request %v", ctx.Request)
+	p.logger.Infof("received request %v", ctx.Request)
 	req, err := p.ctrl.GetFromHTTPRequest(ctx)
 	if err != nil {
 		handleBrokerError(ctx, err, "get model.request from HTTP request")
@@ -139,7 +141,7 @@ func (p *Proxy) proxyHTTPRequest(ctx *gin.Context) {
 	}
 
 	if err := p.ctrl.ProcessHTTPRequest(ctx, svcType, httpReq, req, req.Fee, p.ctrl.Service.OutputPrice, true); err != nil {
-		log.Printf("process http request failed: %v", err)
+		p.logger.Errorf("process http request failed: %v", err)
 	}
 }
 

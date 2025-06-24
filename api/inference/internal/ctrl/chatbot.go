@@ -113,7 +113,7 @@ func (c *Ctrl) handleChargingResponse(ctx *gin.Context, resp *http.Response, acc
 	}
 
 	if err := c.decodeAndProcess(ctx, rawBody.Bytes(), resp.Header.Get("Content-Encoding"), account, outputPrice, false, requestHash); err != nil {
-		log.Printf("decode and process failed: %v", err)
+		c.logger.Errorf("decode and process failed: %v", err)
 		return err
 	}
 
@@ -282,7 +282,7 @@ func (c *Ctrl) generateSignature(ctx context.Context, lastResponseFee *big.Int, 
 		RequestHash: int64Hash,
 	}
 
-	log.Printf("request in ZK: %v", reqInZK)
+	c.logger.Infof("request in ZK: %v", reqInZK)
 
 	signatures, err := c.GenerateSignatures(ctx, reqInZK)
 	if err != nil {
@@ -299,7 +299,7 @@ func (c *Ctrl) generateSignature(ctx context.Context, lastResponseFee *big.Int, 
 	}
 
 	signature := string(sig)
-	log.Printf("signature  %v", signature)
+	c.logger.Infof("signature  %v", signature)
 
 	return signature, nil
 }
