@@ -88,19 +88,19 @@ func (c *Ctrl) GetChatbotInputFee(reqBody []byte) (string, error) {
 }
 
 func getInputCount(reqBody []byte) (int64, error) {
-	var bodyMap map[string]interface{}
-	if err := json.Unmarshal(reqBody, &bodyMap); err != nil {
-		return 0, fmt.Errorf("failed to unmarshal reqBody: %w", err)
-	}
-	messages, ok := bodyMap["messages"]
-	if !ok {
-		return 0, fmt.Errorf("messages field not found in reqBody")
-	}
-	messagesBytes, err := json.Marshal(messages)
-	if err != nil {
-		return 0, fmt.Errorf("failed to marshal messages: %w", err)
-	}
-	return int64(len(messagesBytes)), nil
+	// var bodyMap map[string]interface{}
+	// if err := json.Unmarshal(reqBody, &bodyMap); err != nil {
+	// 	return 0, fmt.Errorf("failed to unmarshal reqBody: %w", err)
+	// }
+	// messages, ok := bodyMap["messages"]
+	// if !ok {
+	// 	return 0, fmt.Errorf("messages field not found in reqBody")
+	// }
+	// messagesBytes, err := json.Marshal(messages)
+	// if err != nil {
+	// 	return 0, fmt.Errorf("failed to marshal messages: %w", err)
+	// }
+	return int64(1), nil
 }
 
 func (c *Ctrl) handleChatbotResponse(ctx *gin.Context, resp *http.Response, account model.User, outputPrice int64, reqBody []byte, reqModel model.Request) error {
