@@ -21,7 +21,7 @@ func (c *Ctrl) PrepareHTTPRequest(ctx *gin.Context, targetURL string, reqBody []
 	}
 
 	for k, v := range ctx.Request.Header {
-		if _, ok := constant.RequestMetaData[k]; !ok {
+		if _, ok := constant.RequestMetaDataDuplicate[k]; !ok {
 			req.Header.Set(k, v[0])
 			continue
 		}

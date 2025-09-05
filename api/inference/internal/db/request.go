@@ -53,7 +53,29 @@ func (d *DB) UpdateRequest(latestReqCreateAt *time.Time) error {
 	return ret.Error
 }
 
-func (d *DB) UpdateOutputFeeWithSignature(requestHash, userAddress, outputFee, requestFee, unsettledFee, signature string) error {
+func (d *DB) DeleteSettledRequests(latestReqCreateAt *time.Time) error {
+	ret := d.db.
+		Where("processed = ?", false).
+		Where("created_at <= ?", *latestReqCreateAt).
+		Delete(&model.Request{})
+	return ret.Error
+}
+
+func (d *DB) DeleteSettledRequestsExcludingUsers(latestReqCreateAt *time.Time, excludedUsers []string) error {
+	if len(excludedUsers) == 0 {
+		// If no users to exclude, delete all settled requests
+		return d.DeleteSettledRequests(latestReqCreateAt)
+	}
+	
+	ret := d.db.
+		Where("processed = ?", false).
+		Where("created_at <= ?", *latestReqCreateAt).
+		Where("user_address NOT IN ?", excludedUsers).
+		Delete(&model.Request{})
+	return ret.Error
+}
+
+func (d *DB) UpdateOutputFee(requestHash, userAddress, outputFee, requestFee, unsettledFee string) error {
 	return d.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.
 			Where(&model.Request{
@@ -62,7 +84,7 @@ func (d *DB) UpdateOutputFeeWithSignature(requestHash, userAddress, outputFee, r
 			Updates(&model.Request{
 				OutputFee:    outputFee,
 				Fee:          requestFee,
-				TeeSignature: signature}).Error; err != nil {
+				}).Error; err != nil {
 			return err
 		}
 
@@ -85,7 +107,7 @@ func (d *DB) CreateRequest(req model.Request) error {
 	return ret.Error
 }
 
-func (d *DB) PruneRequest(minNonceMap map[string]string) error {
+func (d *DB) c(minNonceMap map[string]string) error {
 	var whereClauses []string
 	var args []interface{}
 

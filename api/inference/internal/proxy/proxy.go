@@ -134,7 +134,9 @@ func (p *Proxy) proxyHTTPRequest(ctx *gin.Context) {
 		return
 	}
 
-	if err := p.ctrl.ValidateRequest(ctx, req, req.Fee, expectedInputFee); err != nil {
+	req.InputFee = expectedInputFee
+
+	if err := p.ctrl.ValidateRequest(ctx, req); err != nil {
 		handleBrokerError(ctx, err, "validate request")
 		return
 	}

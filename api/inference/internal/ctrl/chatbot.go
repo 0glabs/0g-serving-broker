@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/big"
 	"net/http"
 	"strings"
 
@@ -27,7 +26,6 @@ import (
 	"github.com/0glabs/0g-serving-broker/common/errors"
 	"github.com/0glabs/0g-serving-broker/common/util"
 	"github.com/0glabs/0g-serving-broker/inference/model"
-	"github.com/0glabs/0g-serving-broker/inference/zkclient/models"
 )
 
 const ChatPrefix = "chat"
@@ -315,11 +313,6 @@ func (c *Ctrl) updateAccountWithOutput(ctx context.Context, output string, outpu
 		return err
 	}
 
-	signature, err := c.generateSignature(ctx, lastResponseFee, account, requestHash)
-	if err != nil {
-		return err
-	}
-
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -333,49 +326,11 @@ func (c *Ctrl) updateAccountWithOutput(ctx context.Context, output string, outpu
 		return err
 	}
 
-	if err := c.db.UpdateOutputFeeWithSignature(requestHash, account.User, lastResponseFee.String(), requestFee.String(), unsettledFee.String(), signature); err != nil {
+	if err := c.db.UpdateOutputFee(requestHash, account.User, lastResponseFee.String(), requestFee.String(), unsettledFee.String()); err != nil {
 		return errors.Wrap(err, "Error updating request")
 	}
 
 	return nil
-}
-
-func (c *Ctrl) generateSignature(ctx context.Context, lastResponseFee *big.Int, account model.User, requestHash string) (string, error) {
-	hash, err := hexutil.Decode(requestHash)
-	if err != nil {
-		return "", err
-	}
-
-	int64Hash := make([]int64, len(hash))
-	for i, v := range hash {
-		int64Hash[i] = int64(v)
-	}
-
-	reqInZK := &models.RequestResponse{
-		ResFee:      lastResponseFee.String(),
-		RequestHash: int64Hash,
-	}
-
-	log.Printf("request in ZK: %v", reqInZK)
-
-	signatures, err := c.GenerateSignatures(ctx, reqInZK)
-	if err != nil {
-		return "", err
-	}
-
-	if len(signatures) != 1 {
-		return "", fmt.Errorf("expected exactly one signature, while got %v", len(signatures))
-	}
-
-	sig, err := json.Marshal(signatures[0])
-	if err != nil {
-		return "", err
-	}
-
-	signature := string(sig)
-	log.Printf("signature  %v", signature)
-
-	return signature, nil
 }
 
 func isStreamDone(line []byte) bool {

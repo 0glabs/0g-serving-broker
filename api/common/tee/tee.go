@@ -164,3 +164,17 @@ func (s *TeeService) GetQuote() (string, error) {
 
 	return string(jsonData), nil
 }
+
+// Sign signs the given message hash with the TEE provider signer
+func (s *TeeService) Sign(messageHash []byte) ([]byte, error) {
+	if s.ProviderSigner == nil {
+		return nil, errors.New("provider signer not initialized")
+	}
+	
+	signature, err := crypto.Sign(messageHash, s.ProviderSigner)
+	if err != nil {
+		return nil, errors.Wrap(err, "signing message")
+	}
+	
+	return signature, nil
+}
